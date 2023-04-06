@@ -1,0 +1,15 @@
+[project]
+name = "nsphere"
+description = "Conversion between cartesian and hyperspherical coordinates"
+version = "0.0.1"
+requires-python = ">=3.8"
+dependencies = ["numpy"]
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=42"]
+
+[tool.black]
+line-length = 120
+target-version = ["py39"]
+preview = true
