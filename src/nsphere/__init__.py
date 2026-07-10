@@ -33,10 +33,8 @@ def to_spherical[FloatingT: np.floating[Any]](
     The zero vector is represented by all zeros.
     """
     _validate_coordinates(cartesian)
-    squares = np.square(cartesian)
-    radius = np.sqrt(squares.sum(axis=-1, keepdims=True))
-
-    tail_norms = np.sqrt(np.cumsum(squares[..., ::-1], axis=-1)[..., ::-1])
+    tail_norms = np.hypot.accumulate(cartesian[..., ::-1], axis=-1)[..., ::-1]
+    radius = tail_norms[..., :1]
     middle_angles = np.arctan2(tail_norms[..., 1:-1], cartesian[..., :-2])
     last_angle = np.arctan2(cartesian[..., -1:], cartesian[..., -2:-1])
     last_angle = np.where(last_angle < 0, last_angle + 2 * math.pi, last_angle)

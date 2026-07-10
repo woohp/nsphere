@@ -40,6 +40,22 @@ def test_batched_high_dimensional_roundtrip(dtype: torch.dtype) -> None:
     torch.testing.assert_close(actual, original, rtol=2e-5, atol=2e-6)
 
 
+@pytest.mark.parametrize(
+    ("dtype", "scale"),
+    [(torch.float32, 1e30), (torch.float32, 1e-30), (torch.float64, 1e300), (torch.float64, 1e-300)],
+)
+def test_extreme_finite_magnitudes(dtype: torch.dtype, scale: float) -> None:
+    cartesian = torch.tensor([1, 2, 3], dtype=dtype) * scale
+
+    spherical = nsphere.torch.to_spherical(cartesian)
+
+    assert torch.isfinite(spherical).all()
+    assert spherical[0] != 0
+    torch.testing.assert_close(spherical[0] / scale, torch.tensor(math.sqrt(14), dtype=dtype))
+    expected_angles = torch.tensor([math.acos(1 / math.sqrt(14)), math.atan2(3, 2)], dtype=dtype)
+    torch.testing.assert_close(spherical[1:], expected_angles)
+
+
 def test_zero_vector_has_canonical_representation() -> None:
     torch.testing.assert_close(nsphere.torch.to_spherical(torch.zeros(4)), torch.zeros(4))
 

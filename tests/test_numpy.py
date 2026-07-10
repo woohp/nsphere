@@ -51,6 +51,21 @@ def test_batched_high_dimensional_roundtrip(dtype: type[np.floating]) -> None:
     np.testing.assert_allclose(actual, original, rtol=2e-5, atol=2e-6)
 
 
+@pytest.mark.parametrize(
+    ("dtype", "scale"),
+    [(np.float32, 1e30), (np.float32, 1e-30), (np.float64, 1e300), (np.float64, 1e-300)],
+)
+def test_extreme_finite_magnitudes(dtype: type[np.floating], scale: float) -> None:
+    cartesian = np.array([1, 2, 3], dtype=dtype) * dtype(scale)
+
+    spherical = nsphere.to_spherical(cartesian)
+
+    assert np.isfinite(spherical).all()
+    assert spherical[0] != 0
+    np.testing.assert_allclose(spherical[0] / dtype(scale), math.sqrt(14), rtol=1e-6)
+    np.testing.assert_allclose(spherical[1:], [math.acos(1 / math.sqrt(14)), math.atan2(3, 2)], rtol=1e-6)
+
+
 def test_zero_vector_has_canonical_representation() -> None:
     np.testing.assert_array_equal(nsphere.to_spherical(np.zeros(4)), np.zeros(4))
 

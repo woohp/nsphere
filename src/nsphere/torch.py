@@ -23,14 +23,21 @@ def to_spherical(cartesian: torch.Tensor) -> torch.Tensor:
     The zero vector is represented by all zeros.
     """
     _validate_coordinates(cartesian)
-    squares = torch.square(cartesian)
-    radius = torch.sqrt(squares.sum(dim=-1, keepdim=True))
-
-    tail_norms = torch.sqrt(torch.cumsum(squares.flip(-1), dim=-1).flip(-1))
+    tail_norms = _suffix_norms(cartesian)
+    radius = tail_norms[..., :1]
     middle_angles = torch.atan2(tail_norms[..., 1:-1], cartesian[..., :-2])
     last_angle = torch.atan2(cartesian[..., -1:], cartesian[..., -2:-1])
     last_angle = torch.where(last_angle < 0, last_angle + 2 * math.pi, last_angle)
     return torch.cat((radius, middle_angles, last_angle), dim=-1)
+
+
+def _suffix_norms(cartesian: torch.Tensor) -> torch.Tensor:
+    norm = cartesian[..., -1].abs()
+    reversed_norms = [norm]
+    for index in range(cartesian.shape[-1] - 2, -1, -1):
+        norm = torch.hypot(cartesian[..., index], norm)
+        reversed_norms.append(norm)
+    return torch.stack(reversed_norms[::-1], dim=-1)
 
 
 def _validate_coordinates(coordinates: torch.Tensor) -> None:
