@@ -2,20 +2,6 @@
 
 Convert between Cartesian and hyperspherical coordinates with NumPy or PyTorch.
 
-## Installation
-
-nsphere requires Python 3.12 or newer. Install the NumPy implementation:
-
-```console
-uv add nsphere
-```
-
-The PyTorch adapter does not install PyTorch for you. Add it separately if needed:
-
-```console
-uv add torch
-```
-
 ## Usage
 
 ```python
